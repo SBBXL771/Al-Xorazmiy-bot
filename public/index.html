@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Startuplar Diagrammasi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>📊 Startuplar Ro'yxati</h1>
+    <select id="startupSelect">
+        <option value="">Startup tanlang</option>
+    </select>
+    <div id="chartContainer" style="display: none;">
+        <h2 id="startupName"></h2>
+        <canvas id="myChart"></canvas>
+    </div>
+    <div id="periodButtons" style="display: none;">
+        <button onclick="showChart('7')">7 kunlik</button>
+        <button onclick="showChart('30')">30 kunlik</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Startuplar ro'yxatini olish
+        fetch('http://localhost:3000/getData')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('startupSelect');
+                for (let id in data) {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = `${data[id].name} (PM: ${data[id].pm})`;
+                    select.appendChild(option);
+                }
+            });
+
+        // Startup tanlanganda
+        document.getElementById('startupSelect').addEventListener('change', (e) => {
+            const startupId = e.target.value;
+            const chartContainer = document.getElementById('chartContainer');
+            const periodButtons = document.getElementById('periodButtons');
+            if (startupId) {
+                fetch(`http://localhost:3000/getData`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const startup = data[startupId];
+                        document.getElementById('startupName').textContent = `📈 ${startup.name} - Bugungi narx: $${startup.data[0]}`;
+                        chartContainer.style.display = 'none';
+                        periodButtons.style.display = 'block';
+                    });
+            } else {
+                chartContainer.style.display = 'none';
+                periodButtons.style.display = 'none';
+            }
+        });
+
+        // Diagrammani ko'rsatish
+        function showChart(period) {
+            const startupId = document.getElementById('startupSelect').value;
+            if (!startupId) {
+                alert('❌ Iltimos, startupni tanlang!');
+                return;
+            }
+
+            fetch(`http://localhost:3000/getData`)
+                .then(response => response.json())
+                .then(data => {
+                    const startup = data[startupId];
+                    document.getElementById('startupName').textContent = `📈 ${startup.name} - ${period === '7' ? '7 kunlik' : '30 kunlik'} diagrama`;
+                    const chartContainer = document.getElementById('chartContainer');
+                    const periodButtons = document.getElementById('periodButtons');
+                    chartContainer.style.display = 'block';
+                    periodButtons.style.display = 'none';
+
+                    const ctx = document.getElementById('myChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: period === '7' ? ["10.07", "11.07", "12.07", "13.07", "14.07", "15.07", "16.07"] : ["10.07", "11.07", "12.07", "13.07", "14.07", "15.07", "16.07", "17.07", "18.07", "19.07", "20.07", "21.07", "22.07", "23.07", "24.07", "25.07", "26.07", "27.07", "28.07", "29.07", "30.07", "31.07", "01.08", "02.08", "03.08", "04.08", "05.08", "06.08", "07.08", "08.08"],
+                            datasets: [{
+                                label: 'Aksiya narxi ($)',
+                                data: period === '7' ? startup.data.slice(0, 7) : startup.data,
+                                borderColor: '#36A2EB',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: false }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Ma\'lumot olishda xatolik:', error));
+        }
+    </script>
+</body>
+</html>

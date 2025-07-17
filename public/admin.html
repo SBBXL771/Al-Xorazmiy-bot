@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Paneli</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>📊 Admin Paneli</h1>
+    <select id="startupSelect">
+        <option value="">Startup tanlang</option>
+    </select>
+    <input type="number" id="newPrice" step="0.01" placeholder="Yangi aksiya narxi ($)">
+    <button onclick="updatePrice()">Kiritish ✅</button>
+    <div id="statusMessage"></div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Startuplar ro'yxatini olish
+        fetch('http://localhost:3000/getData')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('startupSelect');
+                for (let id in data) {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = `${data[id].name} (PM: ${data[id].pm})`;
+                    select.appendChild(option);
+                }
+            });
+
+        function updatePrice() {
+            const startupId = document.getElementById('startupSelect').value;
+            const newPrice = parseFloat(document.getElementById('newPrice').value);
+            const statusMessage = document.getElementById('statusMessage');
+            if (startupId && !isNaN(newPrice)) {
+                fetch('http://localhost:3000/updateData', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: startupId, newData: [newPrice, ...startups[startupId].data.slice(0, 29)] })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    statusMessage.innerHTML = `✅ ${data.message}`;
+                    document.getElementById('newPrice').value = '';
+                })
+                .catch(error => {
+                    statusMessage.innerHTML = `❌ Xatolik yuz berdi: ${error}`;
+                    console.error('Xatolik:', error);
+                });
+            } else {
+                statusMessage.innerHTML = '❌ Iltimos, startup va narxni toʻgʻri kiriting!';
+            }
+        }
+    </script>
+</body>
+</html>
