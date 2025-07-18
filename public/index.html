@@ -21,7 +21,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Startuplar ro'yxatini olish
         fetch('http://localhost:3000/getData')
             .then(response => response.json())
             .then(data => {
@@ -33,8 +32,6 @@
                     select.appendChild(option);
                 }
             });
-
-        // Startup tanlanganda
         document.getElementById('startupSelect').addEventListener('change', (e) => {
             const startupId = e.target.value;
             const chartContainer = document.getElementById('chartContainer');
@@ -53,8 +50,6 @@
                 periodButtons.style.display = 'none';
             }
         });
-
-        // Diagrammani ko'rsatish
         function showChart(period) {
             const startupId = document.getElementById('startupSelect').value;
             if (!startupId) {

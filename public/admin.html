@@ -15,7 +15,6 @@
     <div id="statusMessage"></div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Startuplar ro'yxatini olish
         fetch('http://localhost:3000/getData')
             .then(response => response.json())
             .then(data => {
@@ -48,7 +47,7 @@
                     console.error('Xatolik:', error);
                 });
             } else {
-                statusMessage.innerHTML = '❌ Iltimos, startup va narxni toʻgʻri kiriting!';
+                statusMessage.innerHTML = '❌ Iltimos, startup va narxni togri kiriting!';
             }
         }
     </script>
